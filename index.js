@@ -50,7 +50,7 @@ bot.on('msg:text', async ctx => {
       await ctx.conversation.enter('incomeHandler');
       break;
     
-    case '📈 Show how it is going 📉':
+    case '📈 Show how I am doing 📉':
       await ctx.conversation.enter('trackHandler');
       break;
 

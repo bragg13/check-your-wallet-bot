@@ -20,6 +20,15 @@ const categoryKeyboard = () => {
   return kb.oneTime();
 };
 
+const emojiKb = () => {
+  let kb = new Keyboard();
+  kb.text('🫠').text('😊').text('😲').row();
+  kb.text('😍').text('🤑').text('😱').row();
+  kb.text('😏').text('🤧').text('😫').row();
+
+  return kb.oneTime();
+}
+
 export async function expenseHandler (conversation, ctx) {
   let expense = {};
   let money, note, category, date;
@@ -48,6 +57,7 @@ export async function expenseHandler (conversation, ctx) {
     // what next?
     ctx = await conversation.wait();
     switch(ctx.message.text) {
+      case '(✔️) 🗒️ Add some notes...':
       case '🗒️ Add some notes...':
         // ask to input some text
         await ctx.reply(`So, WHY did you spend those ${money}${currencySymbol}?`);
@@ -56,7 +66,8 @@ export async function expenseHandler (conversation, ctx) {
         note = ctx.message.text;
         noteDone = true;
         break;
-
+         
+      case '(✔️) 🏺 Set category...':
       case '🏺 Set category...':
         // ask to input some text
         await ctx.reply(`So, HOW did you spend those ${money}${currencySymbol}?`, {
@@ -83,7 +94,7 @@ export async function expenseHandler (conversation, ctx) {
   expense['currency'] = ctx.session.user.def_currency;
   if (noteDone) expense['note'] = note;
   if (categoryDone) expense['category'] = category;
-  expense['date'] = `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+  expense['date'] = date.toUTCString();
 
   // save to session
   conversation.session.user.expenses.push(expense);
@@ -94,9 +105,81 @@ export async function expenseHandler (conversation, ctx) {
   return;
 }
 
+
 export async function incomeHandler (conversation, ctx) {
-  await ctx.reply('Send me the document, I\'ll wait :)');
+  let income = {};
+  let money, note, happiness, date;
+  let noteDone = false, happinessDone = false, done = false;
+  date = new Date();
+
+  await ctx.reply(`That's great ${conversation.session.user.username}!\nHow much are we talking about?`);
   ctx = await conversation.wait();
+  
+  // ask to input how much money went spent
+  money = ctx.message.text;
+  const currencySymbol = currencySymbols[ctx.session.user.def_currency];
+
+  while (!done) {
+    // loop to fill out the expense note
+    const kb = new Keyboard();
+    kb.text( (noteDone) ? `(✔️) 🗒️ Add some notes...` : `🗒️ Add some notes...`).row();
+    kb.text( (happinessDone) ? `(✔️) 😀 How happy are you?` : `😀 How happy are you?`).row();
+    kb.text(`✅ Done.`).row();
+    kb.oneTime();
+  
+    await ctx.reply((noteDone || happinessDone) ? `I mean, ${money}${currencySymbol} is still something...` : `I mean, ${money}${currencySymbol} is still something...`, {
+      reply_markup: kb
+    });
+  
+    // what next?
+    ctx = await conversation.wait();
+    switch(ctx.message.text) {
+      case '(✔️) 🗒️ Add some notes...':
+      case '🗒️ Add some notes...':
+        // ask to input some text
+        await ctx.reply(`So, where did you get these ${money}${currencySymbol} from?`);
+        ctx = await conversation.wait();
+        
+        note = ctx.message.text;
+        noteDone = true;
+        break;
+
+      case '(✔️) 😀 How happy are you?':
+      case '😀 How happy are you?':
+        // ask to input some text
+        await ctx.reply(`Tell me how happy you are with an emoji or choose one from below`, {
+          reply_markup: emojiKb()
+        });
+        ctx = await conversation.wait();
+        
+        happiness = ctx.message.text;
+        happinessDone = true;
+        break;
+
+      case '✅ Done.':
+        done = true;
+        break;
+
+    }
+
+    if (noteDone && happinessDone)
+      done = true;
+  }
+
+  // set the expense object
+  income['money'] = money;
+  income['currency'] = ctx.session.user.def_currency;
+  if (noteDone) income['note'] = note;
+  if (happinessDone) income['happiness'] = happiness;
+  income['date'] = date.toUTCString();
+
+  // save to session
+  conversation.session.user.incomes.push(income);
+
+  await ctx.reply(`➕ Income added!`, {
+    reply_markup: mainKeyboard()
+  })
+  return;
 }
 
 export async function currencyHandler (conversation, ctx) {
