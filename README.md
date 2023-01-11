@@ -8,3 +8,7 @@ IDEAs:
 - currency exchange
 - add reactions based on the category money got spent in
 - cant spend/get 0€
+- show tracks by category
+- show tracks by date 
+- send monthly/weekly recap
+- show in chronological order tracking

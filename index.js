@@ -27,6 +27,7 @@ bot.use(conversations());
 bot.use(createConversation(expenseHandler));
 bot.use(createConversation(incomeHandler));
 bot.use(createConversation(currencyHandler));
+bot.use(createConversation(trackHandler));
 bot.api.config.use(hydrateFiles(process.env.BOT_TOKEN));
 
 /* start commmand - shows welcome/back */
@@ -37,6 +38,7 @@ bot.command('start', async ctx => { startHandler(ctx) });
 bot.command('expense', async ctx => { await ctx.conversation.enter('expenseHandler') });
 bot.command('income', async ctx => { await ctx.conversation.enter('incomeHandler') });
 bot.command('currency', async ctx => { await ctx.conversation.enter('currencyHandler') });
+bot.command('tracking', async ctx => { await ctx.conversation.enter('trackHandler') });
 
 /* buttons */
 bot.on('msg:text', async ctx => {
@@ -54,7 +56,7 @@ bot.on('msg:text', async ctx => {
       await ctx.conversation.enter('trackHandler');
       break;
 
-    case `💱 Change default currency [${ctx.session.user.def_currency}] 💱`:
+    case `💱 Change default currency 💱`:
       await ctx.conversation.enter('currencyHandler');
       break;
 
@@ -82,9 +84,6 @@ process.once('SIGTERM', () => {
  * @param {Context} ctx 
  */
 const startHandler = ctx => {
-
-  
-
   if (!ctx.session.user.username | ctx.session.user.username.length==0) {
     // fill in the session
     ctx.session.user.chatid = ctx.message.from.id; 
@@ -108,6 +107,7 @@ export const mainKeyboard = () => {
   const kb = new Keyboard();
   kb.text(`🔴 💶 Spent some money! :c 💶 🔴`).row();
   kb.text(`🟢 💶 Found some money! :) 💶 🟢`).row();
+  kb.text(`📈 Show how I am doing 📉`).row();
   kb.text(`💱 Change default currency 💱`).row();
   
   return kb.oneTime();

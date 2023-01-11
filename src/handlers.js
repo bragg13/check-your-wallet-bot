@@ -29,6 +29,40 @@ const emojiKb = () => {
   return kb.oneTime();
 }
 
+const trackingKb = () => {
+  let kb = new Keyboard();
+  kb.text('🧮 Show me the whole expenses/incomes list').row();
+  kb.text('🏺 Sort by category').row();
+  kb.text('📅 Show the last month').text('⏱️ Show the current month').row();
+  kb.text('🔙 Back 🔙').row();
+
+  return kb.oneTime();
+}
+
+const formatMessageEntry = (e, type) => {
+  let tmp = '';
+
+  // format date
+  let date = new Date(e.date);
+  let day = date.getDate(); 
+  let month = date.toString().split(' ')[1]; 
+  let year = date.getUTCFullYear();
+  
+  // construct string
+  if (type == 'expense') {
+    tmp += `💔 Spent ${e.money}${currencySymbols[e.currency]}`;
+    if (e['note']) tmp += ` for "${e.note}"`;
+    if (e['category']) tmp += ` - ${e.category}`;
+  } else {
+    tmp = `💚 Got ${e.money}${currencySymbols[e.currency]}`;
+    if (e['note']) tmp += ` for "${e.note}"`;
+    if (e['happiness']) tmp += ` (you were like: ${e.happiness})`;
+  }
+  tmp += `\non ${day} ${month} ${year}`;
+
+  return tmp;
+}
+
 export async function expenseHandler (conversation, ctx) {
   let expense = {};
   let money, note, category, date;
@@ -94,7 +128,7 @@ export async function expenseHandler (conversation, ctx) {
   expense['currency'] = ctx.session.user.def_currency;
   if (noteDone) expense['note'] = note;
   if (categoryDone) expense['category'] = category;
-  expense['date'] = date.toUTCString();
+  expense['date'] = date;
 
   // save to session
   conversation.session.user.expenses.push(expense);
@@ -120,7 +154,7 @@ export async function incomeHandler (conversation, ctx) {
   const currencySymbol = currencySymbols[ctx.session.user.def_currency];
 
   while (!done) {
-    // loop to fill out the expense note
+    // loop to fill out the income note
     const kb = new Keyboard();
     kb.text( (noteDone) ? `(✔️) 🗒️ Add some notes...` : `🗒️ Add some notes...`).row();
     kb.text( (happinessDone) ? `(✔️) 😀 How happy are you?` : `😀 How happy are you?`).row();
@@ -171,7 +205,7 @@ export async function incomeHandler (conversation, ctx) {
   income['currency'] = ctx.session.user.def_currency;
   if (noteDone) income['note'] = note;
   if (happinessDone) income['happiness'] = happiness;
-  income['date'] = date.toUTCString();
+  income['date'] = date;
 
   // save to session
   conversation.session.user.incomes.push(income);
@@ -190,6 +224,142 @@ export async function currencyHandler (conversation, ctx) {
 }
 
 export async function trackHandler (conversation, ctx) {
-  await ctx.reply('Send me the document, I\'ll wait :)');
-  ctx = await conversation.wait();
+  let done = false;
+  let expenses = conversation.session.user.expenses;
+  let incomes = conversation.session.user.incomes;
+  let message = '';
+  let currentDate = new Date();
+  
+  await ctx.reply(`Okay ${conversation.session.user.username}, let's see how your finances are going`, {
+    reply_markup: trackingKb()
+  });
+  
+  while (!done) {
+    // loop to menu
+    ctx = await conversation.wait();
+
+    switch(ctx.message.text) {
+      case '🧮 Show me the whole expenses/incomes list': 
+        message = '';
+        for (let e of expenses) {
+          let tmp = formatMessageEntry(e, 'expense');
+          message += tmp;
+          message += '\n';
+        }
+
+        message += '\n';
+
+        for (let i of incomes) {
+          let tmp = formatMessageEntry(i, 'income');
+          message += tmp;
+          message += '\n';
+        }
+
+        await ctx.reply(message, {
+          reply_markup: trackingKb()
+        });
+        break;
+
+      case '🏺 Sort by category': 
+        ctx.reply('Which category?', {
+          reply_markup: categoryKeyboard()
+        });
+        ctx = await conversation.wait();
+        
+        let cat = ctx.message.text;
+        let empty = true;
+        message = '';
+
+        for (let e of expenses) {
+          if (e['category'] && e['category']==cat) {
+            let tmp = formatMessageEntry(e, 'expense');
+            message += tmp;
+            message += '\n';
+            empty = false;
+          }
+        }
+
+        // if there is no entry for this category
+        if (empty) message = `Sorry, didn't find any expense for ${cat}!`;
+        
+        await ctx.reply(message, {
+          reply_markup: trackingKb()
+        });
+        break;
+
+      case '📅 Show the last month': 
+        message = '';
+
+        if (currentDate.getMonth() == 0) {
+          ctx.reply('Currently not available, the year just began :)', {
+            reply_markup: trackingKb()
+          })
+          break;
+        }
+
+        for (let e of expenses) {
+          let _date = new Date(e.date);
+          if (_date.getMonth() == currentDate.getMonth()-1) {
+            let tmp = formatMessageEntry(e, 'expense');
+            message += tmp;
+            message += '\n';
+          }
+        }
+
+        message += '\n';
+
+        for (let i of incomes) {
+          let _date = new Date(i.date);
+          if (_date.getMonth() == currentDate.getMonth()-1) {
+            let tmp = formatMessageEntry(i, 'income');
+            message += tmp;
+            message += '\n';
+          }
+        }
+
+        await ctx.reply(message, {
+          reply_markup: trackingKb()
+        });
+        break;
+
+      case '⏱️ Show the current month': 
+        message = '';
+
+        for (let e of expenses) {
+          let _date = new Date(e.date);
+          if (_date.getMonth() == currentDate.getMonth()) {
+            let tmp = formatMessageEntry(e, 'expense');
+            message += tmp;
+            message += '\n';
+          }
+        }
+
+        message += '\n';
+
+        for (let i of incomes) {
+          let _date = new Date(i.date);
+          if (_date.getMonth() == currentDate.getMonth()) {
+            let tmp = formatMessageEntry(i, 'income');
+            message += tmp;
+            message += '\n';
+          }
+        }
+
+        await ctx.reply(message, {
+          reply_markup: trackingKb()
+        });
+        break;
+        
+      case '🔙 Back 🔙':
+        done = true;
+        break;
+
+    }
+  } 
+
+  // back
+  await ctx.reply(`Back to main menu...`, {
+    reply_markup: mainKeyboard()
+  })
+  return;
 }
