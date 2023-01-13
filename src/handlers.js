@@ -1,4 +1,4 @@
-import { Context, Keyboard } from "grammy";
+import { Bot, Context, Keyboard } from "grammy";
 import { mainKeyboard } from "../index.js";
 const currencySymbols = {
   'EUR': '€',
@@ -39,6 +39,16 @@ const trackingKb = () => {
   return kb.oneTime();
 }
 
+const settingsKb = (settings) => {
+  let kb = new Keyboard();
+  // kb.text(settings.weeklySumup ? '🔕 Set weekly sum-up off' : '🔔 Set weekly sum-up on').row();
+  kb.text(settings.monthlySumup ? '🔕 Set monthly sum-up off' : '🔔 Set monthly sum-up on').row();
+  kb.text('❌ Delete my data').row();
+  kb.text('🔙 Back 🔙').row();
+
+  return kb.oneTime();
+}
+
 const currencyKb = () => {
   let kb = new Keyboard();
   kb.text('EUR').text('USD').row();
@@ -72,6 +82,24 @@ const formatMessageEntry = (e, type) => {
 
   return tmp;
 }
+
+const deleteData = (conversation) => {
+  conversation.session.user = {
+    chatid: '',
+    username: '',
+    lang: '',
+    def_currency: 'EUR',
+    expenses: [],
+    incomes: [],
+    settings: {
+      // weeklySumup: true,
+      monthlySumup: true
+    }
+  };
+  
+  console.log('tbd');
+}
+
 
 export async function expenseHandler (conversation, ctx) {
   let expense = {};
@@ -251,7 +279,7 @@ export async function trackHandler (conversation, ctx) {
   let currentDate = new Date();
   
   // dont show menu if no expennses/incomes
-  if (expenses.length == 0 || incomes.length == 0) {
+  if (expenses.length == 0 && incomes.length == 0) {
     await ctx.reply(`You still haven't added any expenses nor incomes!`, {
       reply_markup: mainKeyboard()
     });  
@@ -389,5 +417,81 @@ export async function trackHandler (conversation, ctx) {
   await ctx.reply(`Back to main menu...`, {
     reply_markup: mainKeyboard()
   })
+  return;
+}
+
+export async function settingsHandler (conversation, ctx) {
+  let done = false;
+  let curr;
+  const yesnoKb = new Keyboard();
+  yesnoKb.text('YES!').row();
+  yesnoKb.text('Oops wrong button').row();
+  yesnoKb.oneTime();
+
+  let settings = conversation.session.user.settings;
+
+  await ctx.reply(`Select an option:`, {
+    reply_markup: settingsKb(settings)
+  });
+  
+  while (!done) {
+    // loop to menu
+    ctx = await conversation.wait();
+    
+    switch(ctx.message.text) {
+      // case '🔕 Set weekly sum-up off': 
+      // case '🔔 Set weekly sum-up on':
+      //   curr = conversation.session.user.settings.weeklySumup;
+      //   conversation.session.user.settings.weeklySumup = !curr;
+
+      //   await ctx.reply(`Select an option:`, {
+      //     reply_markup: settingsKb(settings)
+      //   });
+      //   break;
+
+      case '🔕 Set monthly sum-up off': 
+      case '🔔 Set monthly sum-up on':
+        curr = conversation.session.user.settings.monthlySumup;
+        conversation.session.user.settings.monthlySumup = !curr;
+        
+        await ctx.reply(`Select an option:`, {
+          reply_markup: settingsKb(settings)
+        });
+
+      case '❌ Delete my data':
+        await ctx.reply(`Are you sure you want to delete all your data?`, {
+          reply_markup: yesnoKb
+        })
+
+        ctx = await conversation.wait();
+
+        if (ctx.message.text == 'YES!') {
+          deleteData(conversation);
+          await ctx.reply(`Data successfully deleted!`);
+          done = true;
+
+        } else {
+          await ctx.reply(`Happens all the time.`, {
+            reply_markup: settingsKb(settings)
+          });
+
+        }
+        break;
+        
+      case '🔙 Back 🔙':
+        done = true;
+        break;
+
+    }
+  } 
+
+  // back
+  await ctx.reply(`Back to main menu...`, {
+    reply_markup: mainKeyboard()
+  })
+  return;
+}
+
+export async function editHandler (conversation, ctx) {
   return;
 }

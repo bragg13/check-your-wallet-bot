@@ -15,6 +15,7 @@
     "@grammyjs/files": "^1.0.4",
     "@grammyjs/storage-file": "^2.0.0",
     "@grammyjs/storage-mongodb": "^2.0.2",
+    "cron": "^2.2.0",
     "dotenv": "^16.0.3",
     "grammy": "^1.12.0",
     "mongodb": "^4.13.0"
