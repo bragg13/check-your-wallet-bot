@@ -39,6 +39,16 @@ const trackingKb = () => {
   return kb.oneTime();
 }
 
+const currencyKb = () => {
+  let kb = new Keyboard();
+  kb.text('EUR').text('USD').row();
+  kb.text('GBP').text('JPY').row();
+  kb.text('AUD').text('CAD').row();
+  kb.text('CHF').text('CNH').row();
+
+  return kb.oneTime();
+}
+
 const formatMessageEntry = (e, type) => {
   let tmp = '';
 
@@ -139,7 +149,6 @@ export async function expenseHandler (conversation, ctx) {
   return;
 }
 
-
 export async function incomeHandler (conversation, ctx) {
   let income = {};
   let money, note, happiness, date;
@@ -217,10 +226,21 @@ export async function incomeHandler (conversation, ctx) {
 }
 
 export async function currencyHandler (conversation, ctx) {
-  // const currencySymbol = 
-  await ctx.reply('WIP');
+  await ctx.reply('Okay, choose a currency from below or type in a custom one:', {
+    reply_markup: currencyKb()
+  });
+
+  ctx = await conversation.wait();
+
+  // maybe some checks
+  let currency = ctx.message.text.substring(0, 3);
+  conversation.session.user.def_currency = currency;
+
+  // back
+  await ctx.reply(`New currency set!`, {
+    reply_markup: mainKeyboard()
+  })
   return;
-  // ctx = await conversation.wait();
 }
 
 export async function trackHandler (conversation, ctx) {
@@ -230,6 +250,14 @@ export async function trackHandler (conversation, ctx) {
   let message = '';
   let currentDate = new Date();
   
+  // dont show menu if no expennses/incomes
+  if (expenses.length == 0 || incomes.length == 0) {
+    await ctx.reply(`You still haven't added any expenses nor incomes!`, {
+      reply_markup: mainKeyboard()
+    });  
+    return; 
+  }
+
   await ctx.reply(`Okay ${conversation.session.user.username}, let's see how your finances are going`, {
     reply_markup: trackingKb()
   });

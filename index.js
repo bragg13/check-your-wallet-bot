@@ -1,80 +1,90 @@
 import {Bot, session} from 'grammy';
+import { Keyboard } from 'grammy';
+import { MongoDBAdapter } from "@grammyjs/storage-mongodb";
+import { MongoClient } from "mongodb";
 import { FileAdapter } from '@grammyjs/storage-file';
+
 import pkg_files from "@grammyjs/files";
 import pkg_conversation from "@grammyjs/conversations";
-import { Keyboard } from 'grammy';
 const { conversations, createConversation} = pkg_conversation;
 const { FileFlavor, hydrateFiles } = pkg_files;
 
 import { expenseHandler, incomeHandler, currencyHandler, trackHandler } from './src/handlers.js'
-const bot = new Bot(process.env.BOT_TOKEN);
+const client = new MongoClient(process.env.MONGODB_URL);
 
-/* session management */
-bot.use(session({ initial: () => ({ user : {
-    chatid: '',
-    username: '',
-    lang: '',
-    def_currency: 'EUR',
-    expenses: [],
-    incomes: [] 
-  }}),
-  storage: new FileAdapter({
-    dirName: "sessions",
-  })
-}));
+async function bootstrap() {
+  const bot = new Bot(process.env.BOT_TOKEN);
 
-bot.use(conversations());
-bot.use(createConversation(expenseHandler));
-bot.use(createConversation(incomeHandler));
-bot.use(createConversation(currencyHandler));
-bot.use(createConversation(trackHandler));
-bot.api.config.use(hydrateFiles(process.env.BOT_TOKEN));
-
-/* start commmand - shows welcome/back */
-bot.command('start', async ctx => { startHandler(ctx) });
-
-
-/* commands */
-bot.command('expense', async ctx => { await ctx.conversation.enter('expenseHandler') });
-bot.command('income', async ctx => { await ctx.conversation.enter('incomeHandler') });
-bot.command('currency', async ctx => { await ctx.conversation.enter('currencyHandler') });
-bot.command('tracking', async ctx => { await ctx.conversation.enter('trackHandler') });
-
-/* buttons */
-bot.on('msg:text', async ctx => {
-  const txt = ctx.message.text;
-  switch (txt) {
-    case '🔴 💶 Spent some money! :c 💶 🔴':
-      await ctx.conversation.enter('expenseHandler');
-      break;
-
-    case '🟢 💶 Found some money! :) 💶 🟢':
-      await ctx.conversation.enter('incomeHandler');
-      break;
+  /* mongodb */
+  await client.connect();
+  const db = client.db(process.env.MONGODB_DB);
+  const sessions = db.collection('users');
     
-    case '📈 Show how I am doing 📉':
-      await ctx.conversation.enter('trackHandler');
-      break;
+  /* session management */
+  bot.use(session({ initial: () => ({ user : {
+      chatid: '',
+      username: '',
+      lang: '',
+      def_currency: 'EUR',
+      expenses: [],
+      incomes: [] 
+    }}),
+    storage: new MongoDBAdapter({ collection: sessions })
+  }));
+  
+  bot.use(conversations());
+  bot.use(createConversation(expenseHandler));
+  bot.use(createConversation(incomeHandler));
+  bot.use(createConversation(currencyHandler));
+  bot.use(createConversation(trackHandler));
+  bot.api.config.use(hydrateFiles(process.env.BOT_TOKEN));
+  
+  /* start commmand - shows welcome/back */
+  bot.command('start', async ctx => { startHandler(ctx) });
+  
+  /* commands */
+  bot.command('expense', async ctx => { await ctx.conversation.enter('expenseHandler') });
+  bot.command('income', async ctx => { await ctx.conversation.enter('incomeHandler') });
+  bot.command('currency', async ctx => { await ctx.conversation.enter('currencyHandler') });
+  bot.command('tracking', async ctx => { await ctx.conversation.enter('trackHandler') });
+  
+  /* buttons */
+  bot.on('msg:text', async ctx => {
+    const txt = ctx.message.text;
+    switch (txt) {
+      case '🔴 💶 Spent some money! :c 💶 🔴':
+        await ctx.conversation.enter('expenseHandler');
+        break;
+  
+      case '🟢 💶 Found some money! :) 💶 🟢':
+        await ctx.conversation.enter('incomeHandler');
+        break;
+      
+      case '📈 Show how I am doing 📉':
+        await ctx.conversation.enter('trackHandler');
+        break;
+  
+      case `💱 Change default currency 💱`:
+        await ctx.conversation.enter('currencyHandler');
+        break;
+  
+      }
+  });
+  
+  
+  bot.start();
+  console.log('Bot running.')
 
-    case `💱 Change default currency 💱`:
-      await ctx.conversation.enter('currencyHandler');
-      break;
+  process.once('SIGINT', () => {
+    // TODO: delete session
+    bot.stop('SIGINT')
+  });
+  process.once('SIGTERM', () => {
+    // TODO: delete session
+    bot.stop('SIGTERM')
+  });
+}
 
-    }
-});
-
-
-/* === bootstrap === */
-bot.start();
-console.log('Bot running.')
-process.once('SIGINT', () => {
-  // TODO: delete session
-  bot.stop('SIGINT')
-});
-process.once('SIGTERM', () => {
-  // TODO: delete session
-  bot.stop('SIGTERM')
-});
 
 
 /**
@@ -112,3 +122,6 @@ export const mainKeyboard = () => {
   
   return kb.oneTime();
 }
+
+
+bootstrap();

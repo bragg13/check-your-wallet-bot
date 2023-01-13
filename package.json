@@ -1,5 +1,5 @@
 {
-  "name": "checl_your_wallet_bot",
+  "name": "check_your_wallet_bot",
   "version": "1.0.0",
   "description": "Just another Telegram bot to keep track of your expenses and whatnot idk.",
   "main": "index.js",
@@ -14,7 +14,9 @@
     "@grammyjs/conversations": "^1.1.0",
     "@grammyjs/files": "^1.0.4",
     "@grammyjs/storage-file": "^2.0.0",
+    "@grammyjs/storage-mongodb": "^2.0.2",
     "dotenv": "^16.0.3",
-    "grammy": "^1.12.0"
+    "grammy": "^1.12.0",
+    "mongodb": "^4.13.0"
   }
 }
