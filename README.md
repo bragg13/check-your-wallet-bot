@@ -12,3 +12,9 @@ IDEAs:
 - show tracks by date 
 - send monthly/weekly recap
 - show in chronological order tracking
+
+- somma e totale nelle spese
+- aggiungere 00 o 0 ai numeri con virgola
+- controlli nell'inserimento valori OK
+- date change
+isNaN

@@ -83,6 +83,10 @@ const formatMessageEntry = (e, type) => {
   return tmp;
 }
 
+const formatMoney = money => {
+
+}
+
 const deleteData = (conversation) => {
   conversation.session.user = {
     chatid: '',
@@ -109,6 +113,12 @@ export async function expenseHandler (conversation, ctx) {
 
   await ctx.reply(`Sad to hear that ${conversation.session.user.username} :c\nHow much did you spend?`);
   ctx = await conversation.wait();
+
+  // check if it is a number
+  while (isNaN(ctx.message.text)){
+    await ctx.reply(`Are you sure that is a number? (ndr. use dot as separator)`);
+    ctx = await conversation.wait();
+  }
   
   // ask to input how much money went spent
   money = ctx.message.text;
@@ -185,6 +195,12 @@ export async function incomeHandler (conversation, ctx) {
 
   await ctx.reply(`That's great ${conversation.session.user.username}!\nHow much are we talking about?`);
   ctx = await conversation.wait();
+  
+  // check if it is a number
+  while (isNaN(ctx.message.text)){
+    await ctx.reply(`Are you sure that is a number? (ndr. use dot as separator)`);
+    ctx = await conversation.wait();
+  }
   
   // ask to input how much money went spent
   money = ctx.message.text;
