@@ -84,7 +84,13 @@ const formatMessageEntry = (e, type) => {
 }
 
 const formatMoney = money => {
+  let _money = money.split('.');
 
+  return (_money.length == 1) 
+    ? money                                       // no digits after dot, return
+    : (_money[1].length == 1)
+      ? `${_money[0]}.${_money[1]}0`              // one digit after dot, add a 0
+      : money                                     // two digits after dot, return
 }
 
 const deleteData = (conversation) => {
@@ -121,7 +127,7 @@ export async function expenseHandler (conversation, ctx) {
   }
   
   // ask to input how much money went spent
-  money = ctx.message.text;
+  money = formatMoney(ctx.message.text);
   const currencySymbol = currencySymbols[ctx.session.user.def_currency];
 
   while (!done) {
@@ -203,7 +209,7 @@ export async function incomeHandler (conversation, ctx) {
   }
   
   // ask to input how much money went spent
-  money = ctx.message.text;
+  money = formatMoney(ctx.message.text);
   const currencySymbol = currencySymbols[ctx.session.user.def_currency];
 
   while (!done) {
