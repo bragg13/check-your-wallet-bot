@@ -14,7 +14,7 @@ IDEAs:
 - show in chronological order tracking
 
 - somma e totale nelle spese
-- aggiungere 00 o 0 ai numeri con virgola
+- aggiungere 00 o 0 ai numeri con virgola OK
 - controlli nell'inserimento valori OK
 - date change
 isNaN

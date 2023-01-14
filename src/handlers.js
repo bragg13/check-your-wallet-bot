@@ -86,7 +86,7 @@ const formatMessageEntry = (e, type) => {
 const formatMoney = money => {
   let _money = money.split('.');
 
-  return (_money.length == 1) 
+  return (_money.length == 1)     
     ? money                                       // no digits after dot, return
     : (_money[1].length == 1)
       ? `${_money[0]}.${_money[1]}0`              // one digit after dot, add a 0
@@ -299,8 +299,10 @@ export async function trackHandler (conversation, ctx) {
   let incomes = conversation.session.user.incomes;
   let message = '';
   let currentDate = new Date();
+  let totExp = 0, totInc = 0;
+  let currency = currencySymbols[conversation.session.user.def_currency];
   
-  // dont show menu if no expennses/incomes
+  // dont show menu if no expenses/incomes
   if (expenses.length == 0 && incomes.length == 0) {
     await ctx.reply(`You still haven't added any expenses nor incomes!`, {
       reply_markup: mainKeyboard()
@@ -321,6 +323,7 @@ export async function trackHandler (conversation, ctx) {
         message = '';
         for (let e of expenses) {
           let tmp = formatMessageEntry(e, 'expense');
+          totExp += parseFloat(e.money);
           message += tmp;
           message += '\n';
         }
@@ -329,9 +332,14 @@ export async function trackHandler (conversation, ctx) {
 
         for (let i of incomes) {
           let tmp = formatMessageEntry(i, 'income');
+          totInc += parseFloat(i.money);
           message += tmp;
           message += '\n';
         }
+
+        message += `\n\n😵‍💫 You spent a total of ${totExp}${currency}\n💯 You got a total of ${totInc}${currency}`
+        totExp = 0;
+        totInc = 0;
 
         await ctx.reply(message, {
           reply_markup: trackingKb()
@@ -353,9 +361,12 @@ export async function trackHandler (conversation, ctx) {
             let tmp = formatMessageEntry(e, 'expense');
             message += tmp;
             message += '\n';
+            totExp += parseFloat(e.money);
             empty = false;
           }
         }
+        message += `\n\n😵‍💫 You spent a total of ${totExp}${currency} in ${cat}!`
+        totExp = 0;
 
         // if there is no entry for this category
         if (empty) message = `Sorry, didn't find any expense for ${cat}!`;
@@ -381,6 +392,7 @@ export async function trackHandler (conversation, ctx) {
             let tmp = formatMessageEntry(e, 'expense');
             message += tmp;
             message += '\n';
+            totExp += parseFloat(e.money);
           }
         }
 
@@ -392,8 +404,12 @@ export async function trackHandler (conversation, ctx) {
             let tmp = formatMessageEntry(i, 'income');
             message += tmp;
             message += '\n';
+            totInc += parseFloat(i.money);
           }
         }
+        message += `\n\n😵‍💫 You spent a total of ${totExp}${currency}\n💯 You got a total of ${totInc}${currency}`
+        totExp = 0;
+        totInc = 0;
 
         await ctx.reply(message, {
           reply_markup: trackingKb()
@@ -409,6 +425,7 @@ export async function trackHandler (conversation, ctx) {
             let tmp = formatMessageEntry(e, 'expense');
             message += tmp;
             message += '\n';
+            totExp += parseFloat(e.money);
           }
         }
 
@@ -420,9 +437,13 @@ export async function trackHandler (conversation, ctx) {
             let tmp = formatMessageEntry(i, 'income');
             message += tmp;
             message += '\n';
+            totInc += parseFloat(i.money);
           }
         }
-
+        message += `\n\n😵‍💫 You spent a total of ${totExp}${currency}\n💯 You got a total of ${totInc}${currency}`
+        totExp = 0;
+        totInc = 0;
+        
         await ctx.reply(message, {
           reply_markup: trackingKb()
         });
