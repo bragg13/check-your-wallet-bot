@@ -152,7 +152,7 @@ const startHandler = ctx => {
 export const mainKeyboard = () => {
   const kb = new Keyboard();
   kb.text(`🔴 Spent some money! :c 🔴`).text(`🟢 Found some money! :) 🟢`).row();
-  kb.text(`🖋️ Edit my expenses/incomes 🖋️`).row();
+  // kb.text(`🖋️ Edit my expenses/incomes 🖋️`).row();
   kb.text(`📈 Show how I am doing 📉`).row();
   kb.text(`💱 Change default currency 💱`).text(`⚙️ Settings ⚙️`).row();
   
