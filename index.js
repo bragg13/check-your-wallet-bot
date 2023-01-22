@@ -11,10 +11,11 @@ import pkg_conversation from "@grammyjs/conversations";
 const { conversations, createConversation} = pkg_conversation;
 const { FileFlavor, hydrateFiles } = pkg_files;
 
-import { expenseHandler, incomeHandler, currencyHandler, trackHandler, editHandler, settingsHandler } from './src/handlers.js'
-// import pkg_cron from "cron";
-// const { CronJob } = pkg_cron;
-
+import { Calendar } from "grammy-calendar";
+import { currencyHandler,  editHandler, settingsHandler } from './src/handlers.js'
+import { expenseHandler } from './src/expense.js'
+import { incomeHandler } from './src/income.js'
+import { trackHandler } from './src/tracking.js' 
 
 const client = new MongoClient(process.env.MONGODB_URL);
 const bot = new Bot(process.env.BOT_TOKEN);
@@ -35,10 +36,14 @@ bot.use(session({ initial: () => ({ user : {
     settings: {
       // weeklySumup: true,
       monthlySumup: true
-    }
+    },
+    calendarOptions: {} 
   }}),
   storage: new MongoDBAdapter({ collection: sessions })
 }));
+
+export const calendarMenu = new Calendar(ctx => ctx.session.calendarOptions);
+bot.use(calendarMenu);
 
 bot.use(conversations());
 bot.use(createConversation(expenseHandler));
@@ -129,6 +134,7 @@ const startHandler = ctx => {
     ctx.session.user.chatid = ctx.message.from.id; 
     ctx.session.user.username = ctx.message.from.username; 
     ctx.session.user.lang = ctx.message.from.language_code;
+
     ctx.reply(`Hey ${ctx.session.user.username} 👋, welcome to the bot!`, {
       reply_markup: mainKeyboard()
   });

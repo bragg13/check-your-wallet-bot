@@ -13,7 +13,7 @@ IDEAs:
 - send monthly/weekly recap
 - show in chronological order tracking
 
-- somma e totale nelle spese
+- somma e totale nelle spese OK
 - aggiungere 00 o 0 ai numeri con virgola OK
 - controlli nell'inserimento valori OK
 - date change
