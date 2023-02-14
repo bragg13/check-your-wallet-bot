@@ -31,13 +31,9 @@ bot.use(session({ initial: () => ({ user : {
     username: '',
     lang: '',
     def_currency: 'EUR',
-    expenses: [],
-    incomes: [],
-    settings: {
-      // weeklySumup: true,
-      monthlySumup: true
-    },
-    calendarOptions: {} 
+    wallet: [],
+    calendarOptions: {},
+    custom_categories: []
   }}),
   storage: new MongoDBAdapter({ collection: sessions })
 }));
@@ -157,29 +153,4 @@ export const mainKeyboard = () => {
   kb.text(`💱 Change default currency 💱`).text(`⚙️ Settings ⚙️`).row();
   
   return kb.oneTime();
-}
-
-const setupSchedules = () => {
-  const months = [
-    new Date(2023, 0, 1, 8, 0, 0, 0),
-    new Date(2023, 1, 1, 8, 0, 0, 0),
-    new Date(2023, 2, 1, 8, 0, 0, 0),
-    new Date(2023, 3, 1, 8, 0, 0, 0),
-
-    new Date(2023, 4, 1, 8, 0, 0, 0),
-    new Date(2023, 5, 1, 8, 0, 0, 0),
-    new Date(2023, 6, 1, 8, 0, 0, 0),
-    new Date(2023, 7, 1, 8, 0, 0, 0),
-
-    new Date(2023, 8, 1, 8, 0, 0, 0),
-    new Date(2023, 9, 1, 8, 0, 0, 0),
-    new Date(2023, 10, 1, 8, 0, 0, 0),
-    new Date(2023, 11, 1, 8, 0, 0, 0)
-  ];
-
-  // const job = new CronJob(date, function() {
-  //   const d = new Date();
-  //   console.log('Specific date:', date, ', onTick at:', d);
-  // });
-
 }

@@ -104,12 +104,9 @@ export async function incomeHandler(conversation, ctx) {
   if (happinessDone) income['happiness'] = happiness;
   income['date'] = date;
 
-  // save to session
-  conversation.session.user.incomes.push(income);
-
-  let sorted = sortByDate(conversation.session.user.incomes);
-
-  conversation.session.user.incomes = sorted;
+  // save to session and sort wallet
+  conversation.session.user.wallet.push(income);
+  conversation.session.user.wallet = sortByDate(conversation.session.user.wallet);;
 
   await ctx.reply(`➕ Income added!`, {
     reply_markup: mainKeyboard()
