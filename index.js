@@ -99,6 +99,10 @@ bot.start();
 bot.catch((err) => {
   const ctx = err.ctx;
   console.error(`Error while handling update ${ctx.update.update_id}:`);
+
+  // reset conversation object in user.session  
+  ctx.session.conversation = null;
+
   const e = err.error;
   if (e instanceof GrammyError) {
     console.error("Error in request:", e.description);
@@ -141,10 +145,7 @@ const startHandler = ctx => {
     ctx.reply(`Hey ${ctx.session.user.username}, 👋 welcome back to the bot!`, {
       reply_markup: mainKeyboard()
   });
-    
   }
-  
-
 }
 
 export const mainKeyboard = () => {

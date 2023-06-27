@@ -115,16 +115,6 @@ export async function settingsHandler(conversation, ctx) {
     ctx = await conversation.wait();
 
     switch (ctx.message.text) {
-      // case '🔕 Set weekly sum-up off': 
-      // case '🔔 Set weekly sum-up on':
-      //   curr = conversation.session.user.settings.weeklySumup;
-      //   conversation.session.user.settings.weeklySumup = !curr;
-
-      //   await ctx.reply(`Select an option:`, {
-      //     reply_markup: settingsKb(settings)
-      //   });
-      //   break;
-
       case '🔕 Set monthly sum-up off':
       case '🔔 Set monthly sum-up on':
         curr = conversation.session.user.settings.monthlySumup;
