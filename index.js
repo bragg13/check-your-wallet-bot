@@ -31,13 +31,12 @@ bot.use(session({ initial: () => ({ user : {
     username: '',
     lang: '',
     def_currency: 'EUR',
-    expenses: [],
-    incomes: [],
+    wallet: [],
+    calendarOptions: {},
+    custom_categories: [],
     settings: {
-      // weeklySumup: true,
       monthlySumup: true
-    },
-    calendarOptions: {} 
+    }
   }}),
   storage: new MongoDBAdapter({ collection: sessions })
 }));
@@ -96,11 +95,14 @@ bot.on('msg:text', async ctx => {
     }
 });
 
-
 bot.start();
 bot.catch((err) => {
   const ctx = err.ctx;
   console.error(`Error while handling update ${ctx.update.update_id}:`);
+
+  // reset conversation object in user.session  
+  ctx.session.conversation = null;
+
   const e = err.error;
   if (e instanceof GrammyError) {
     console.error("Error in request:", e.description);
@@ -143,43 +145,15 @@ const startHandler = ctx => {
     ctx.reply(`Hey ${ctx.session.user.username}, 👋 welcome back to the bot!`, {
       reply_markup: mainKeyboard()
   });
-    
   }
-  
-
 }
 
 export const mainKeyboard = () => {
   const kb = new Keyboard();
   kb.text(`🔴 Spent some money! :c 🔴`).text(`🟢 Found some money! :) 🟢`).row();
-  kb.text(`🖋️ Edit my expenses/incomes 🖋️`).row();
+  // kb.text(`🖋️ Edit my expenses/incomes 🖋️`).row();
   kb.text(`📈 Show how I am doing 📉`).row();
   kb.text(`💱 Change default currency 💱`).text(`⚙️ Settings ⚙️`).row();
   
   return kb.oneTime();
-}
-
-const setupSchedules = () => {
-  const months = [
-    new Date(2023, 0, 1, 8, 0, 0, 0),
-    new Date(2023, 1, 1, 8, 0, 0, 0),
-    new Date(2023, 2, 1, 8, 0, 0, 0),
-    new Date(2023, 3, 1, 8, 0, 0, 0),
-
-    new Date(2023, 4, 1, 8, 0, 0, 0),
-    new Date(2023, 5, 1, 8, 0, 0, 0),
-    new Date(2023, 6, 1, 8, 0, 0, 0),
-    new Date(2023, 7, 1, 8, 0, 0, 0),
-
-    new Date(2023, 8, 1, 8, 0, 0, 0),
-    new Date(2023, 9, 1, 8, 0, 0, 0),
-    new Date(2023, 10, 1, 8, 0, 0, 0),
-    new Date(2023, 11, 1, 8, 0, 0, 0)
-  ];
-
-  // const job = new CronJob(date, function() {
-  //   const d = new Date();
-  //   console.log('Specific date:', date, ', onTick at:', d);
-  // });
-
 }

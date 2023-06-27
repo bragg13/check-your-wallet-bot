@@ -12,9 +12,23 @@ export const currencySymbols = {
   'CNH': '¥'
 };
 
+export const months = {
+  0: 'January',
+  1: 'February',
+  2: 'March',
+  3: 'April',
+  4: 'May',
+  5: 'June',
+  6: 'July',
+  7: 'August',
+  8: 'September',
+  9: 'October',
+  10: 'November',
+  11: 'December'
+};
+
 const settingsKb = (settings) => {
   let kb = new Keyboard();
-  // kb.text(settings.weeklySumup ? '🔕 Set weekly sum-up off' : '🔔 Set weekly sum-up on').row();
   kb.text(settings.monthlySumup ? '🔕 Set monthly sum-up off' : '🔔 Set monthly sum-up on').row();
   kb.text('❌ Delete my data').row();
   kb.text('🔙 Back 🔙').row();
@@ -57,7 +71,6 @@ const deleteData = (conversation) => {
     expenses: [],
     incomes: [],
     settings: {
-      // weeklySumup: true,
       monthlySumup: true
     }
   };
@@ -102,16 +115,6 @@ export async function settingsHandler(conversation, ctx) {
     ctx = await conversation.wait();
 
     switch (ctx.message.text) {
-      // case '🔕 Set weekly sum-up off': 
-      // case '🔔 Set weekly sum-up on':
-      //   curr = conversation.session.user.settings.weeklySumup;
-      //   conversation.session.user.settings.weeklySumup = !curr;
-
-      //   await ctx.reply(`Select an option:`, {
-      //     reply_markup: settingsKb(settings)
-      //   });
-      //   break;
-
       case '🔕 Set monthly sum-up off':
       case '🔔 Set monthly sum-up on':
         curr = conversation.session.user.settings.monthlySumup;
