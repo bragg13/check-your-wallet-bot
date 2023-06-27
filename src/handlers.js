@@ -29,7 +29,6 @@ export const months = {
 
 const settingsKb = (settings) => {
   let kb = new Keyboard();
-  // kb.text(settings.weeklySumup ? '🔕 Set weekly sum-up off' : '🔔 Set weekly sum-up on').row();
   kb.text(settings.monthlySumup ? '🔕 Set monthly sum-up off' : '🔔 Set monthly sum-up on').row();
   kb.text('❌ Delete my data').row();
   kb.text('🔙 Back 🔙').row();
@@ -72,7 +71,6 @@ const deleteData = (conversation) => {
     expenses: [],
     incomes: [],
     settings: {
-      // weeklySumup: true,
       monthlySumup: true
     }
   };

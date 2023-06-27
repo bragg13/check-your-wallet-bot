@@ -28,13 +28,29 @@ export async function expenseHandler(conversation, ctx) {
   let noteDone = false, categoryDone = false, dateDone = false, done = false;
   date = new Date();
 
-  await ctx.reply(`Sad to hear that ${conversation.session.user.username} :c\nHow much did you spend?`);
+  await ctx.reply(`Sad to hear that ${conversation.session.user.username} :c\nHow much did you spend?\n(press 'q' to cancel))`);
   ctx = await conversation.wait();
 
   // check if it is a number
   while (isNaN(ctx.message.text)) {
+    // quit if user types 'q'
+    if (ctx.message.text == 'q') {
+      await ctx.reply(`Canceling operation...`, {
+        reply_markup: mainKeyboard()
+      })
+      return;
+    }
+
     await ctx.reply(`Are you sure that is a number? (ndr. use dot as separator)`);
     ctx = await conversation.wait();
+  }
+
+  // quit if user inputs 0
+  if (ctx.message.text == '0') {
+    await ctx.reply(`Canceling operation...`, {
+      reply_markup: mainKeyboard()
+    })
+    return;
   }
 
   // ask to input how much money went spent

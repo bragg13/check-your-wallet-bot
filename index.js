@@ -33,7 +33,10 @@ bot.use(session({ initial: () => ({ user : {
     def_currency: 'EUR',
     wallet: [],
     calendarOptions: {},
-    custom_categories: []
+    custom_categories: [],
+    settings: {
+      monthlySumup: true
+    }
   }}),
   storage: new MongoDBAdapter({ collection: sessions })
 }));
@@ -91,7 +94,6 @@ bot.on('msg:text', async ctx => {
 
     }
 });
-
 
 bot.start();
 bot.catch((err) => {
