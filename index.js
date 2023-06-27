@@ -1,8 +1,10 @@
-import {Bot, session} from 'grammy';
+import {Bot, session, webhookCallback} from 'grammy';
 import { Keyboard } from 'grammy';
 import { MongoDBAdapter } from "@grammyjs/storage-mongodb";
 import { MongoClient } from "mongodb";
 import { FileAdapter } from '@grammyjs/storage-file';
+import express from 'express';
+import bodyParser from 'body-parser';
 
 import { HttpError, GrammyError } from 'grammy';
 
@@ -17,7 +19,7 @@ import { expenseHandler } from './src/expense.js'
 import { incomeHandler } from './src/income.js'
 import { trackHandler } from './src/tracking.js' 
 
-const client = new MongoClient(process.env.MONGODB_URL);
+const client = new MongoClient(process.env.MONGODB_URL, );
 const bot = new Bot(process.env.BOT_TOKEN);
 
 /* mongodb */
@@ -95,7 +97,16 @@ bot.on('msg:text', async ctx => {
     }
 });
 
-bot.start();
+// run express server in order to implement webhook
+const app = express();
+app.use(express.json());
+app.use(webhookCallback(bot, 'express'));
+
+// const port = process.env.PORT || 3000;
+// app.listen(port, () => console.log(`Listening on port ${port}!`));
+
+
+// bot.start();
 bot.catch((err) => {
   const ctx = err.ctx;
   console.error(`Error while handling update ${ctx.update.update_id}:`);
