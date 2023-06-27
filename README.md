@@ -19,3 +19,19 @@ Made more than a year ago, would totally benefit some deep refactoring.
 - custom categories 
 
 The project is not under active development.
+
+## How to run
+1. Clone the repository
+2. Install dependencies
+```bash
+npm install
+```
+3. Create a .env file with the following variables:
+```
+MONGODB_URL - your MongoDB connection string
+BOT_TOKEN - your BotFather token
+```
+4. Run the bot
+```bash
+npm start
+```
