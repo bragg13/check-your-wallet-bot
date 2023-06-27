@@ -18,4 +18,4 @@ Made more than a year ago, would totally benefit some deep refactoring.
 - recurring expenses
 - custom categories 
 
-The project is not under active development...............
+The project is not under active development.
