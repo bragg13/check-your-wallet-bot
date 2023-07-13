@@ -1,45 +1,46 @@
-import {Bot, session, webhookCallback} from 'grammy';
+import { Bot, session } from 'grammy';
 import { Keyboard } from 'grammy';
 import { MongoDBAdapter } from "@grammyjs/storage-mongodb";
 import { MongoClient } from "mongodb";
 import { FileAdapter } from '@grammyjs/storage-file';
-import express from 'express';
-import bodyParser from 'body-parser';
 
 import { HttpError, GrammyError } from 'grammy';
 
 import pkg_files from "@grammyjs/files";
 import pkg_conversation from "@grammyjs/conversations";
-const { conversations, createConversation} = pkg_conversation;
+const { conversations, createConversation } = pkg_conversation;
 const { FileFlavor, hydrateFiles } = pkg_files;
 
 import { Calendar } from "grammy-calendar";
-import { currencyHandler,  editHandler, settingsHandler } from './src/handlers.js'
+import { currencyHandler, editHandler, settingsHandler } from './src/handlers.js'
 import { expenseHandler } from './src/expense.js'
 import { incomeHandler } from './src/income.js'
-import { trackHandler } from './src/tracking.js' 
+import { trackHandler } from './src/tracking.js'
 
-const client = new MongoClient(process.env.MONGODB_URL, );
+const client = new MongoClient(process.env.MONGODB_URL);
 const bot = new Bot(process.env.BOT_TOKEN);
 
 /* mongodb */
 await client.connect();
 const db = client.db(process.env.MONGODB_DB);
 const sessions = db.collection('users');
-  
+
 /* session management */
-bot.use(session({ initial: () => ({ user : {
-    chatid: '',
-    username: '',
-    lang: '',
-    def_currency: 'EUR',
-    wallet: [],
-    calendarOptions: {},
-    custom_categories: [],
-    settings: {
-      monthlySumup: true
+bot.use(session({
+  initial: () => ({
+    user: {
+      chatid: '',
+      username: '',
+      lang: '',
+      def_currency: 'EUR',
+      wallet: [],
+      calendarOptions: {},
+      custom_categories: [],
+      settings: {
+        monthlySumup: true
+      }
     }
-  }}),
+  }),
   storage: new MongoDBAdapter({ collection: sessions })
 }));
 
@@ -81,7 +82,7 @@ bot.on('msg:text', async ctx => {
     case `🖋️ Edit my expenses/incomes 🖋️`:
       await ctx.conversation.enter('editHandler');
       break;
-    
+
     case '📈 Show how I am doing 📉':
       await ctx.conversation.enter('trackHandler');
       break;
@@ -94,17 +95,11 @@ bot.on('msg:text', async ctx => {
       await ctx.conversation.enter('settingsHandler');
       break;
 
-    }
+  }
 });
 
-// run express server in order to implement webhook
-const app = express();
-app.use(express.json());
-app.use(webhookCallback(bot, 'express'));
 
-// const port = process.env.PORT || 3000;
-// app.listen(port, () => console.log(`Listening on port ${port}!`));
-
+bot.start()
 
 // bot.start();
 bot.catch((err) => {
@@ -142,20 +137,20 @@ process.once('SIGTERM', () => {
  * @param {Context} ctx 
  */
 const startHandler = ctx => {
-  if (!ctx.session.user.username | ctx.session.user.username.length==0) {
+  if (!ctx.session.user.username | ctx.session.user.username.length == 0) {
     // fill in the session
-    ctx.session.user.chatid = ctx.message.from.id; 
-    ctx.session.user.username = ctx.message.from.username; 
+    ctx.session.user.chatid = ctx.message.from.id;
+    ctx.session.user.username = ctx.message.from.username;
     ctx.session.user.lang = ctx.message.from.language_code;
 
     ctx.reply(`Hey ${ctx.session.user.username} 👋, welcome to the bot!`, {
       reply_markup: mainKeyboard()
-  });
-    
+    });
+
   } else {
     ctx.reply(`Hey ${ctx.session.user.username}, 👋 welcome back to the bot!`, {
       reply_markup: mainKeyboard()
-  });
+    });
   }
 }
 
@@ -165,6 +160,6 @@ export const mainKeyboard = () => {
   // kb.text(`🖋️ Edit my expenses/incomes 🖋️`).row();
   kb.text(`📈 Show how I am doing 📉`).row();
   kb.text(`💱 Change default currency 💱`).text(`⚙️ Settings ⚙️`).row();
-  
+
   return kb.oneTime();
 }
