@@ -60,3 +60,7 @@ If you use docker-compose to run the database, the connection string should be s
 ```bash
 npm start
 ```
+
+## Known issues
+
+Sometimes, if you start adding a new expense/income and then stop, the next time you try to finish this operation it might just get stuck. It's something to deal with the session and how it's saved in mongodb, so just resetting the mongo environment ("just") makes it work again.

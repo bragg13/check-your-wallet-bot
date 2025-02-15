@@ -139,6 +139,9 @@ export async function expenseHandler(conversation, ctx) {
   }
 
   // set the expense object
+  console.log(conversation.session);
+  console.log(conversation.session.user);
+  console.log(conversation.session.user.wallet);
   expense["type"] = "expense";
   expense["money"] = money;
   expense["currency"] = ctx.session.user.def_currency;
