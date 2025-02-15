@@ -11,6 +11,16 @@ Made years ago, would totally benefit some deep refactoring.
 [x] add emoji reaction to your incomes (useful? not at all)
 [x] handle different currencies
 
+## Couple of screenshots
+
+<details>
+  <summary>Show more</summary>
+  ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot1.png)
+  ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot2.png)
+  ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot3.png)
+  ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot4.png)
+</details>
+
 ## Features to be implemented (at some point)
 
 [-] conversion between currencies
@@ -60,7 +70,3 @@ If you use docker-compose to run the database, the connection string should be s
 ```bash
 npm start
 ```
-
-## Known issues
-
-Sometimes, if you start adding a new expense/income and then stop, the next time you try to finish this operation it might just get stuck. It's something to deal with the session and how it's saved in mongodb, so just resetting the mongo environment ("just") makes it work again.
