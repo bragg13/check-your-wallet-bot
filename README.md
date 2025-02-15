@@ -5,30 +5,35 @@ Made years ago, would totally benefit some deep refactoring.
 
 ## Features available
 
-[x] add notes to your expenses/incomes
-[x] divide expenses/incomes by category
-[x] track how you are doing by category, date interval or month
-[x] add emoji reaction to your incomes (useful? not at all)
-[x] handle different currencies
+- [x] add notes to your expenses/incomes
+- [x] divide expenses/incomes by category
+- [x] track how you are doing by category, date interval or month
+- [x] add emoji reaction to your incomes (useful? not at all)
+- [x] handle different currencies
 
 ## Couple of screenshots
 
 <details>
-  <summary>Show more</summary>
-  ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot1.png)
-  ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot2.png)
-  ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot3.png)
-  ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot4.png)
+<summary>Show more</summary>
+
+![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot2.png)
+
+![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot1.png)
+
+![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot4.png)
+
+![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot3.png)
+
 </details>
 
 ## Features to be implemented (at some point)
 
-[-] conversion between currencies
-[-] add expenses/incomes when receiving a bank notification
-[-] monthly recap of your finances
-[-] recurring expenses
-[-] custom categories
-[-] webhooks instead of polling
+- [-] conversion between currencies
+- [-] add expenses/incomes when receiving a bank notification
+- [-] monthly recap of your finances
+- [-] recurring expenses
+- [-] custom categories
+- [-] webhooks instead of polling
 
 The project is not under active development.
 
