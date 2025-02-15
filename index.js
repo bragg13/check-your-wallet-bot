@@ -1,49 +1,61 @@
-import {Bot, session, webhookCallback} from 'grammy';
-import { Keyboard } from 'grammy';
+import { Bot, session, webhookCallback } from "grammy";
+import { Keyboard } from "grammy";
 import { MongoDBAdapter } from "@grammyjs/storage-mongodb";
 import { MongoClient } from "mongodb";
-import { FileAdapter } from '@grammyjs/storage-file';
-import express from 'express';
-import bodyParser from 'body-parser';
+import { FileAdapter } from "@grammyjs/storage-file";
+import express from "express";
+import bodyParser from "body-parser";
 
-import { HttpError, GrammyError } from 'grammy';
+import { HttpError, GrammyError } from "grammy";
 
 import pkg_files from "@grammyjs/files";
 import pkg_conversation from "@grammyjs/conversations";
-const { conversations, createConversation} = pkg_conversation;
+const { conversations, createConversation } = pkg_conversation;
 const { FileFlavor, hydrateFiles } = pkg_files;
 
 import { Calendar } from "grammy-calendar";
-import { currencyHandler,  editHandler, settingsHandler } from './src/handlers.js'
-import { expenseHandler } from './src/expense.js'
-import { incomeHandler } from './src/income.js'
-import { trackHandler } from './src/tracking.js' 
+import {
+  currencyHandler,
+  editHandler,
+  settingsHandler,
+} from "./src/handlers.js";
+import { expenseHandler } from "./src/expense.js";
+import { incomeHandler } from "./src/income.js";
+import { trackHandler } from "./src/tracking.js";
 
-const client = new MongoClient(process.env.MONGODB_URL, );
+const client = new MongoClient(process.env.MONGODB_URL);
 const bot = new Bot(process.env.BOT_TOKEN);
 
 /* mongodb */
 await client.connect();
 const db = client.db(process.env.MONGODB_DB);
-const sessions = db.collection('users');
-  
-/* session management */
-bot.use(session({ initial: () => ({ user : {
-    chatid: '',
-    username: '',
-    lang: '',
-    def_currency: 'EUR',
-    wallet: [],
-    calendarOptions: {},
-    custom_categories: [],
-    settings: {
-      monthlySumup: true
-    }
-  }}),
-  storage: new MongoDBAdapter({ collection: sessions })
-}));
+const sessions = db.collection("users");
+console.log("Connected to MongoDB");
+console.log(`DB: ${sessions}`);
+console.log(`bot token ${process.env.BOT_TOKEN}`);
 
-export const calendarMenu = new Calendar(ctx => ctx.session.calendarOptions);
+/* session management */
+bot.use(
+  session({
+    initial: () => ({
+      user: {
+        chatid: "",
+        username: "",
+        lang: "",
+        def_currency: "EUR",
+        wallet: [],
+        calendarOptions: {},
+        custom_categories: [],
+        settings: {
+          monthlySumup: true,
+        },
+      },
+    }),
+    storage: new MongoDBAdapter({ collection: sessions }),
+  }),
+);
+
+export const calendarMenu = new Calendar((ctx) => ctx.session.calendarOptions);
 bot.use(calendarMenu);
 
 bot.use(conversations());
@@ -56,62 +68,74 @@ bot.use(createConversation(settingsHandler));
 bot.api.config.use(hydrateFiles(process.env.BOT_TOKEN));
 
 /* start commmand - shows welcome/back */
-bot.command('start', async ctx => { startHandler(ctx) });
+bot.command("start", async (ctx) => {
+  startHandler(ctx);
+});
 
 /* commands */
-bot.command('expense', async ctx => { await ctx.conversation.enter('expenseHandler') });
-bot.command('income', async ctx => { await ctx.conversation.enter('incomeHandler') });
-bot.command('currency', async ctx => { await ctx.conversation.enter('currencyHandler') });
-bot.command('tracking', async ctx => { await ctx.conversation.enter('trackHandler') });
-bot.command('settings', async ctx => { await ctx.conversation.enter('settingsHandler') });
-bot.command('edit', async ctx => { await ctx.conversation.enter('editHandler') });
+bot.command("expense", async (ctx) => {
+  await ctx.conversation.enter("expenseHandler");
+});
+bot.command("income", async (ctx) => {
+  await ctx.conversation.enter("incomeHandler");
+});
+bot.command("currency", async (ctx) => {
+  await ctx.conversation.enter("currencyHandler");
+});
+bot.command("tracking", async (ctx) => {
+  await ctx.conversation.enter("trackHandler");
+});
+bot.command("settings", async (ctx) => {
+  await ctx.conversation.enter("settingsHandler");
+});
+bot.command("edit", async (ctx) => {
+  await ctx.conversation.enter("editHandler");
+});
 
 /* buttons */
-bot.on('msg:text', async ctx => {
+bot.on("msg:text", async (ctx) => {
   const txt = ctx.message.text;
   switch (txt) {
-    case '🔴 Spent some money! :c 🔴':
-      await ctx.conversation.enter('expenseHandler');
+    case "🔴 Spent some money! :c 🔴":
+      await ctx.conversation.enter("expenseHandler");
       break;
 
-    case '🟢 Found some money! :) 🟢':
-      await ctx.conversation.enter('incomeHandler');
+    case "🟢 Found some money! :) 🟢":
+      await ctx.conversation.enter("incomeHandler");
       break;
 
     case `🖋️ Edit my expenses/incomes 🖋️`:
-      await ctx.conversation.enter('editHandler');
+      await ctx.conversation.enter("editHandler");
       break;
-    
-    case '📈 Show how I am doing 📉':
-      await ctx.conversation.enter('trackHandler');
+
+    case "📈 Show how I am doing 📉":
+      await ctx.conversation.enter("trackHandler");
       break;
 
     case `💱 Change default currency 💱`:
-      await ctx.conversation.enter('currencyHandler');
+      await ctx.conversation.enter("currencyHandler");
       break;
 
     case `⚙️ Settings ⚙️`:
-      await ctx.conversation.enter('settingsHandler');
+      await ctx.conversation.enter("settingsHandler");
       break;
-
-    }
+  }
 });
 
 // run express server in order to implement webhook
-const app = express();
-app.use(express.json());
-app.use(webhookCallback(bot, 'express'));
+// const app = express();
+// app.use(express.json());
+// app.use(webhookCallback(bot, "express"));
 
 // const port = process.env.PORT || 3000;
 // app.listen(port, () => console.log(`Listening on port ${port}!`));
 
-
-// bot.start();
+bot.start();
 bot.catch((err) => {
   const ctx = err.ctx;
   console.error(`Error while handling update ${ctx.update.update_id}:`);
 
-  // reset conversation object in user.session  
+  // reset conversation object in user.session
   ctx.session.conversation = null;
 
   const e = err.error;
@@ -123,48 +147,49 @@ bot.catch((err) => {
     console.error("Unknown error:", e);
   }
 });
-console.log('Bot running.')
+console.log("Bot running.");
 
-process.once('SIGINT', () => {
+process.once("SIGINT", () => {
   // TODO: delete session
-  bot.stop('SIGINT')
+  bot.stop("SIGINT");
 });
-process.once('SIGTERM', () => {
+process.once("SIGTERM", () => {
   // TODO: delete session
-  bot.stop('SIGTERM')
+  bot.stop("SIGTERM");
 });
-
 
 /**
  * Conversation handler for /start command.
  * Checks if the user is new, handles their session and asks for the email.
- * @param {Conversation} conversation 
- * @param {Context} ctx 
+ * @param {Conversation} conversation
+ * @param {Context} ctx
  */
-const startHandler = ctx => {
-  if (!ctx.session.user.username | ctx.session.user.username.length==0) {
+const startHandler = (ctx) => {
+  console.log("startHandler");
+  if (!ctx.session.user.username | (ctx.session.user.username.length == 0)) {
     // fill in the session
-    ctx.session.user.chatid = ctx.message.from.id; 
-    ctx.session.user.username = ctx.message.from.username; 
+    ctx.session.user.chatid = ctx.message.from.id;
+    ctx.session.user.username = ctx.message.from.username;
     ctx.session.user.lang = ctx.message.from.language_code;
 
     ctx.reply(`Hey ${ctx.session.user.username} 👋, welcome to the bot!`, {
-      reply_markup: mainKeyboard()
-  });
-    
+      reply_markup: mainKeyboard(),
+    });
   } else {
     ctx.reply(`Hey ${ctx.session.user.username}, 👋 welcome back to the bot!`, {
-      reply_markup: mainKeyboard()
-  });
+      reply_markup: mainKeyboard(),
+    });
   }
-}
+};
 
 export const mainKeyboard = () => {
   const kb = new Keyboard();
-  kb.text(`🔴 Spent some money! :c 🔴`).text(`🟢 Found some money! :) 🟢`).row();
+  kb.text(`🔴 Spent some money! :c 🔴`)
+    .text(`🟢 Found some money! :) 🟢`)
+    .row();
   // kb.text(`🖋️ Edit my expenses/incomes 🖋️`).row();
   kb.text(`📈 Show how I am doing 📉`).row();
   kb.text(`💱 Change default currency 💱`).text(`⚙️ Settings ⚙️`).row();
-  
+
   return kb.oneTime();
-}
+};
