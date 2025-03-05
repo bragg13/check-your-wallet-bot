@@ -18,9 +18,15 @@ Made years ago, would totally benefit some deep refactoring.
 
 ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot2.png)
 
+---
+
 ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot1.png)
 
+---
+
 ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot4.png)
+
+---
 
 ![](https://github.com/bragg13/check-your-wallet-bot/blob/master/screenshots/screenshot3.png)
 
